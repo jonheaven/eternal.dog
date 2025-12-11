@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      .dog-head { fill: #D4AF37; }
+      .dog-ear { fill: #B8860B; }
+      .dog-eye { fill: black; }
+      .dog-nose { fill: #8B4513; }
+      .dog-hat { fill: #4B0082; }
+    </style>
+  </defs>
+  
+  <!-- Hat (wizard) -->
+  <path class="dog-hat" d="M 100 20 L 85 65 L 115 65 Z" />
+  <circle class="dog-hat" cx="100" cy="65" r="20" />
+  <circle class="dog-hat" cx="100" cy="65" r="18" fill="#9370DB" />
+  
+  <!-- Head -->
+  <circle class="dog-head" cx="100" cy="110" r="35" />
+  
+  <!-- Ears -->
+  <ellipse class="dog-ear" cx="75" cy="85" rx="15" ry="25" />
+  <ellipse class="dog-ear" cx="125" cy="85" rx="15" ry="25" />
+  
+  <!-- Eyes -->
+  <circle class="dog-eye" cx="90" cy="105" r="5" />
+  <circle class="dog-eye" cx="110" cy="105" r="5" />
+  
+  <!-- Nose -->
+  <ellipse class="dog-nose" cx="100" cy="120" rx="7" ry="6" />
+  
+  <!-- Mouth -->
+  <path stroke="#8B4513" stroke-width="2" d="M 100 120 Q 95 130 90 128" fill="none" />
+  <path stroke="#8B4513" stroke-width="2" d="M 100 120 Q 105 130 110 128" fill="none" />
+  
+  <!-- Body -->
+  <rect class="dog-head" x="85" y="140" width="30" height="40" rx="5" />
+  
+  <!-- Star for magic -->
+  <path fill="#FFD700" d="M 150 70 L 155 85 L 171 85 L 158 95 L 163 110 L 150 100 L 137 110 L 142 95 L 129 85 L 145 85 Z" />
+</svg>

@@ -1,0 +1,16 @@
+{
+  "name": "eternal-dog-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "concurrently": "^9.0.1"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "dev": "concurrently -n client,server -c cyan,magenta \"cd client && npm run dev -- --open\" \"cd server && npm run start\"",
+    "lint": "cd client && npm run lint && cd ../server && npm run lint",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "audit": "cd server && npm run audit"
+  }
+}

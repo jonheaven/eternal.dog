@@ -1,0 +1,42 @@
+{
+  "name": "eternal-dog-server",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node --esm src/server.ts",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src/**/*.ts",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix || true"
+  },
+  "dependencies": {
+    "@tatumio/tatum": "^4.2.58",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "form-data": "^4.0.0",
+    "helmet": "^7.0.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.0.1",
+    "morgan": "^1.10.0",
+    "nodemailer": "^7.0.11",
+    "stripe": "^20.0.0",
+    "uuid": "^13.0.0",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.0.0",
+    "@types/nodemailer": "^7.0.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

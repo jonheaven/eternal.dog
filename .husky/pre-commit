@@ -1,0 +1,7 @@
+cd client && npm run lint && npm run format && cd ..
+cd server && npm run lint && npm run format && cd ..
+git diff --name-only --cached | findstr /R ".*package\.json$" >nul && (
+	echo Running security audit... && cd server && npm run audit && cd ..
+) || (
+	echo No package.json changes detected; skipping audit.
+)
