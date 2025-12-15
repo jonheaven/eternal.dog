@@ -16,7 +16,7 @@ export const getUtmParams = () => {
 export const uploadPreview = async (
   image: string,
   text: string,
-  userId: string,
+  userId: string
 ) => {
   const utm = getUtmParams();
   const response = await axios.post(`${API_URL}/upload/preview`, {

@@ -39,7 +39,7 @@ export class RetryService {
   async executeWithRetry<T>(
     fn: () => Promise<T>,
     operationName: string,
-    requestId?: string,
+    requestId?: string
   ): Promise<T> {
     // Circuit breaker: if open and not yet reset window, fail fast
     if (this.isCircuitOpen()) {
@@ -54,7 +54,9 @@ export class RetryService {
     for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
       try {
         const prefix = requestId ? `[${requestId}]` : '';
-        logger.info(`${prefix} Attempt ${attempt}/${this.config.maxRetries} for ${operationName}`);
+        logger.info(
+          `${prefix} Attempt ${attempt}/${this.config.maxRetries} for ${operationName}`
+        );
 
         const result = await this.withTimeout(fn(), this.config.timeoutMs);
         this.resetCircuit();
@@ -64,30 +66,40 @@ export class RetryService {
         const prefix = this.prefix(requestId, '');
 
         this.consecutiveFailures += 1;
-        const openCircuit = this.consecutiveFailures >= this.config.circuitBreakerFailureThreshold;
+        const openCircuit =
+          this.consecutiveFailures >=
+          this.config.circuitBreakerFailureThreshold;
 
         if (attempt < this.config.maxRetries && !openCircuit) {
           logger.warn(
-            `${prefix}${operationName} attempt ${attempt} failed (${lastError.message}). Retrying in ${delay}ms...`,
+            `${prefix}${operationName} attempt ${attempt} failed (${lastError.message}). Retrying in ${delay}ms...`
           );
           await this.sleep(delay);
-          delay = Math.min(delay * this.config.backoffMultiplier, this.config.maxDelay);
+          delay = Math.min(
+            delay * this.config.backoffMultiplier,
+            this.config.maxDelay
+          );
         } else {
           if (openCircuit) {
             this.openCircuit();
             logger.error(
-              `${prefix}${operationName} opening circuit after ${this.consecutiveFailures} failures: ${lastError.message}`,
+              `${prefix}${operationName} opening circuit after ${this.consecutiveFailures} failures: ${lastError.message}`
             );
           } else {
             logger.error(
-              `${prefix}${operationName} failed after ${attempt} attempts: ${lastError.message}`,
+              `${prefix}${operationName} failed after ${attempt} attempts: ${lastError.message}`
             );
           }
         }
       }
     }
 
-    throw lastError || new Error(`${operationName} failed after ${this.config.maxRetries} retries`);
+    throw (
+      lastError ||
+      new Error(
+        `${operationName} failed after ${this.config.maxRetries} retries`
+      )
+    );
   }
 
   /**
@@ -99,8 +111,8 @@ export class RetryService {
       new Promise<T>((_, reject) =>
         setTimeout(
           () => reject(new Error(`Operation timed out after ${timeoutMs}ms`)),
-          timeoutMs,
-        ),
+          timeoutMs
+        )
       ),
     ]);
   }

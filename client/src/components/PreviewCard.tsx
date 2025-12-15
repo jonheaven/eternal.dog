@@ -18,12 +18,9 @@ export default function PreviewCard() {
 
   const handleSharePreview = () => {
     const shareText = encodeURIComponent(
-      'Check out my dog\'s eternalization preview on Dogecoin! 🐶 Join eternal.dog',
+      "Check out my dog's eternalization preview on Dogecoin! 🐶 Join eternal.dog"
     );
-    window.open(
-      `https://www.tiktok.com/upload?text=${shareText}`,
-      '_blank',
-    );
+    window.open(`https://www.tiktok.com/upload?text=${shareText}`, '_blank');
   };
 
   const handlePayment = async () => {
@@ -36,12 +33,16 @@ export default function PreviewCard() {
       setLoading(true);
 
       // Create checkout session via API (includes UTM params)
-      const { sessionId, sessionUrl } = await createCheckoutSession(userId, email);
+      const { sessionId, sessionUrl } = await createCheckoutSession(
+        userId,
+        email
+      );
 
       if (!sessionId) throw new Error('No session ID returned');
 
       // Prefer server-provided hosted URL; fall back to constructing path if missing
-      const redirectUrl = sessionUrl || `https://checkout.stripe.com/c/pay/${sessionId}`;
+      const redirectUrl =
+        sessionUrl || `https://checkout.stripe.com/c/pay/${sessionId}`;
       window.location.href = redirectUrl;
     } catch (error) {
       console.error('Payment failed:', error);
@@ -53,7 +54,7 @@ export default function PreviewCard() {
   return (
     <div className="p-4 max-w-md mx-auto bg-white min-h-screen flex flex-col">
       <h2 className="text-xl md:text-2xl font-bold text-center text-black mb-4">
-        Your Dog's Eternalization
+        Your Dog&#39;s Eternalization
       </h2>
       <div className="border-4 border-dogecoin p-2 rounded bg-white">
         <img src={image} alt="Preview" className="w-full mx-auto" />

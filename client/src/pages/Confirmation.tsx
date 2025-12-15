@@ -11,9 +11,12 @@ export default function Confirmation() {
       <button
         onClick={() => {
           const shareText = encodeURIComponent(
-            'I immortalized my dog on Dogecoin! 🐶 Join the Eternal Pack at eternal.dog!',
+            'I immortalized my dog on Dogecoin! 🐶 Join the Eternal Pack at eternal.dog!'
           );
-          window.open(`https://www.tiktok.com/upload?text=${shareText}`, '_blank');
+          window.open(
+            `https://www.tiktok.com/upload?text=${shareText}`,
+            '_blank'
+          );
         }}
         className="mt-4 w-full max-w-xs bg-blue-500 hover:bg-blue-600 text-white p-3 rounded text-lg md:text-xl font-bold transition"
       >
@@ -22,11 +25,11 @@ export default function Confirmation() {
       <button
         onClick={() => {
           const shareText = encodeURIComponent(
-            'I immortalized my dog on Dogecoin! 🐶 eternal.dog',
+            'I immortalized my dog on Dogecoin! 🐶 eternal.dog'
           );
           window.open(
             `https://www.instagram.com/?caption=${shareText}`,
-            '_blank',
+            '_blank'
           );
         }}
         className="mt-2 w-full max-w-xs bg-pink-500 hover:bg-pink-600 text-white p-3 rounded text-lg md:text-xl font-bold transition"

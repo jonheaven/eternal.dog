@@ -31,7 +31,4 @@ const DoginalSchema = new Schema<IDoginal>({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IDoginal>(
-  'Doginal',
-  DoginalSchema,
-);
+export default mongoose.model<IDoginal>('Doginal', DoginalSchema);

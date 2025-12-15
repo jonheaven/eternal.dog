@@ -13,7 +13,11 @@ export const env = {
 };
 
 for (const [key, value] of Object.entries(env)) {
-  if (value === undefined || value === null || (typeof value === 'string' && value.length === 0)) {
+  if (
+    value === undefined ||
+    value === null ||
+    (typeof value === 'string' && value.length === 0)
+  ) {
     throw new Error(`Missing required env var: ${key}`);
   }
 }

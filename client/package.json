@@ -12,29 +12,31 @@
     "audit:fix": "npm audit fix || true"
   },
   "dependencies": {
-    "react": "^19.2.2",
-    "react-dom": "^19.2.2",
-    "react-router-dom": "^7.10.1",
-    "react-cropper": "^2.3.3",
-    "cropperjs": "^2.1.0",
     "@stripe/stripe-js": "^8.5.3",
     "axios": "^1.13.2",
+    "cropperjs": "^2.1.0",
+    "react": "^19.2.2",
+    "react-cropper": "^2.3.3",
+    "react-dom": "^19.2.2",
+    "react-router-dom": "^7.10.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/node": "^25.0.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/node": "^25.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
     "@vitejs/plugin-react": "^5.1.2",
-    "vite": "^7.2.7",
-    "typescript": "^5.9.3",
-    "tailwindcss": "^3.3.6",
-    "postcss": "^8.5.6",
     "autoprefixer": "^10.4.22",
     "eslint": "^8.57.1",
-    "prettier": "^3.7.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1"
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
   }
 }

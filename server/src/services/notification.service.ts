@@ -1,7 +1,10 @@
 import { logger, withRequest } from '../utils/logger.js';
 
 export class NotificationService {
-  async notifySlack(message: string, metadata?: Record<string, any>): Promise<void> {
+  async notifySlack(
+    message: string,
+    metadata?: Record<string, any>
+  ): Promise<void> {
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (!webhookUrl) {
       logger.debug('[SLACK] No webhook configured, skipping notification');
@@ -33,35 +36,63 @@ export class NotificationService {
         logger.debug('[SLACK] Notification sent');
       }
     } catch (error) {
-      logger.error(`[SLACK] Error sending notification: ${(error as any)?.message || error}`);
+      logger.error(
+        `[SLACK] Error sending notification: ${(error as any)?.message || error}`
+      );
     }
   }
 
-  async notifyUploadPreview(userId: string, campaign: string = 'direct'): Promise<void> {
+  async notifyUploadPreview(
+    userId: string,
+    campaign: string = 'direct'
+  ): Promise<void> {
     await this.notifySlack(
       '🐶 *New Preview Upload*\nDog photo uploaded and ready for immortalization',
-      { userId, campaign, timestamp: new Date().toISOString() },
+      { userId, campaign, timestamp: new Date().toISOString() }
     );
   }
 
-  async notifyCheckoutStarted(userId: string, email: string, campaign: string = 'direct'): Promise<void> {
+  async notifyCheckoutStarted(
+    userId: string,
+    email: string,
+    campaign: string = 'direct'
+  ): Promise<void> {
     await this.notifySlack(
       '💳 *Checkout Started*\nPayment flow initiated for $14.20',
-      { userId, email, campaign, timestamp: new Date().toISOString() },
+      { userId, email, campaign, timestamp: new Date().toISOString() }
     );
   }
 
-  async notifyInscriptionComplete(userId: string, email: string, inscriptionId: string, walletAddress: string, campaign: string = 'direct'): Promise<void> {
+  async notifyInscriptionComplete(
+    userId: string,
+    email: string,
+    inscriptionId: string,
+    walletAddress: string,
+    campaign: string = 'direct'
+  ): Promise<void> {
     await this.notifySlack(
       '✅ *Inscription Complete*\nDog immortalized on Dogecoin blockchain! User wallet has been sent $4.20 DOGE.',
-      { userId, email, campaign, inscriptionId, walletAddress, timestamp: new Date().toISOString() },
+      {
+        userId,
+        email,
+        campaign,
+        inscriptionId,
+        walletAddress,
+        timestamp: new Date().toISOString(),
+      }
     );
   }
 
-  async notifyError(context: string, userId: string, error: string, campaign: string = 'direct'): Promise<void> {
-    await this.notifySlack(
-      `❌ *Error in ${context}*\n\`\`\`${error}\`\`\``,
-      { userId, campaign, timestamp: new Date().toISOString() },
-    );
+  async notifyError(
+    context: string,
+    userId: string,
+    error: string,
+    campaign: string = 'direct'
+  ): Promise<void> {
+    await this.notifySlack(`❌ *Error in ${context}*\n\`\`\`${error}\`\`\``, {
+      userId,
+      campaign,
+      timestamp: new Date().toISOString(),
+    });
   }
 }

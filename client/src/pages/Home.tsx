@@ -9,7 +9,7 @@ export default function Home() {
         Immortalize Your Dog for $14.20!
       </h1>
       <p className="text-lg md:text-xl text-center mt-4 max-w-2xl">
-        Save your dog's memory forever on the Dogecoin blockchain. Your pup
+        Save your dog&#39;s memory forever on the Dogecoin blockchain. Your pup
         becomes eternal.
       </p>
       <Link

@@ -37,7 +37,9 @@ export default function Gallery() {
       {/* Header */}
       <header className="bg-amber-900 text-white py-8 text-center">
         <h1 className="text-4xl font-bold mb-2">🐕 The Eternal Dog Pack</h1>
-        <p className="text-amber-100">Forever immortalized on the Dogecoin blockchain</p>
+        <p className="text-amber-100">
+          Forever immortalized on the Dogecoin blockchain
+        </p>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -61,8 +63,12 @@ export default function Gallery() {
         {/* Empty State */}
         {!loading && !error && doginals.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-2xl text-gray-500 mb-4">No eternal dogs yet...</p>
-            <p className="text-gray-400 mb-8">Be the first to immortalize your dog on the blockchain!</p>
+            <p className="text-2xl text-gray-500 mb-4">
+              No eternal dogs yet...
+            </p>
+            <p className="text-gray-400 mb-8">
+              Be the first to immortalize your dog on the blockchain!
+            </p>
             <a
               href="/upload"
               className="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-lg transition"
@@ -77,7 +83,8 @@ export default function Gallery() {
           <>
             <div className="mb-8 text-center">
               <p className="text-gray-600">
-                {doginals.length} dog{doginals.length !== 1 ? 's' : ''} immortalized forever
+                {doginals.length} dog{doginals.length !== 1 ? 's' : ''}{' '}
+                immortalized forever
               </p>
             </div>
 
@@ -143,19 +150,25 @@ function DoginalCard({ doginal }: { doginal: DoginalCard }) {
       <div className="p-4">
         {/* Inscription ID */}
         <div className="mb-3 text-xs text-gray-500 font-mono break-all">
-          <span className="block text-gray-700 font-semibold mb-1">Inscription</span>
+          <span className="block text-gray-700 font-semibold mb-1">
+            Inscription
+          </span>
           {shortId}
         </div>
 
         {/* Transaction ID */}
         <div className="mb-4 text-xs text-gray-500 font-mono break-all">
-          <span className="block text-gray-700 font-semibold mb-1">Blockchain</span>
+          <span className="block text-gray-700 font-semibold mb-1">
+            Blockchain
+          </span>
           {shortTxid}
         </div>
 
         {/* Date */}
         <div className="mb-4 text-sm text-gray-600">
-          <span className="block text-gray-700 font-semibold mb-1">Inscribed</span>
+          <span className="block text-gray-700 font-semibold mb-1">
+            Inscribed
+          </span>
           {date}
         </div>
 

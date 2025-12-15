@@ -19,10 +19,12 @@ router.get('/stats', async (req: Request, res: Response) => {
       total: events.length,
       uploads: events.filter((e) => e.type === 'upload').length,
       checkouts: events.filter((e) => e.type === 'checkout_started').length,
-      inscriptions: events.filter((e) => e.type === 'inscription_complete').length,
+      inscriptions: events.filter((e) => e.type === 'inscription_complete')
+        .length,
       errors: events.filter((e) => e.type === 'error').length,
       uniqueUsers: new Set(events.map((e) => e.userId).filter(Boolean)).size,
-      revenue: events.filter((e) => e.type === 'inscription_complete').length * 14.2,
+      revenue:
+        events.filter((e) => e.type === 'inscription_complete').length * 14.2,
     };
 
     // Breakdown by campaign source
@@ -40,13 +42,16 @@ router.get('/stats', async (req: Request, res: Response) => {
       }
       if (event.type === 'upload') byCampaign[source].uploads++;
       if (event.type === 'checkout_started') byCampaign[source].checkouts++;
-      if (event.type === 'inscription_complete') byCampaign[source].inscriptions++;
+      if (event.type === 'inscription_complete')
+        byCampaign[source].inscriptions++;
     });
 
     // Calculate completion rates
     Object.keys(byCampaign).forEach((source) => {
       const uploads = byCampaign[source].uploads || 1;
-      const rate = ((byCampaign[source].inscriptions / uploads) * 100).toFixed(1);
+      const rate = ((byCampaign[source].inscriptions / uploads) * 100).toFixed(
+        1
+      );
       byCampaign[source].completionRate = `${rate}%`;
       byCampaign[source].revenue = byCampaign[source].inscriptions * 14.2;
     });

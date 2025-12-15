@@ -17,7 +17,7 @@ export class EmailService {
   async sendWalletEmail(
     to: string,
     walletAddress: string,
-    badgeUrl: string,
+    badgeUrl: string
   ): Promise<void> {
     try {
       console.log(`[EMAIL] Sending wallet email to ${to}`);

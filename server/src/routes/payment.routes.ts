@@ -10,7 +10,7 @@ const controller = new PaymentController();
  */
 router.post(
   '/create-checkout-session',
-  controller.createCheckoutSession.bind(controller),
+  controller.createCheckoutSession.bind(controller)
 );
 
 /**
@@ -18,9 +18,6 @@ router.post(
  * Handle Stripe webhook (checkout.session.completed)
  * Triggers: inscription, IPFS upload, wallet creation, email
  */
-router.post(
-  '/webhook',
-  controller.handleWebhook.bind(controller),
-);
+router.post('/webhook', controller.handleWebhook.bind(controller));
 
 export default router;

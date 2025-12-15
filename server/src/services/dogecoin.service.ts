@@ -29,7 +29,7 @@ export class DogecoinService {
 
     if (!address) {
       throw new Error(
-        'Managed Dogecoin wallet address not configured. Set one of DOGE_MANAGED_WALLET_ADDRESS, MANAGED_WALLET_ADDRESS, or DOGECOIN_WALLET_ADDRESS.',
+        'Managed Dogecoin wallet address not configured. Set one of DOGE_MANAGED_WALLET_ADDRESS, MANAGED_WALLET_ADDRESS, or DOGECOIN_WALLET_ADDRESS.'
       );
     }
     return address;
@@ -51,12 +51,15 @@ export class DogecoinService {
   async inscribeFullImage(
     imageBuffer: Buffer,
     text: string,
-    recipientAddress: string,
+    recipientAddress: string
   ): Promise<InscriptionTxResult> {
-    logger.info(`[DOGECOIN] Starting full image inscription: ${imageBuffer.length} bytes`);
+    logger.info(
+      `[DOGECOIN] Starting full image inscription: ${imageBuffer.length} bytes`
+    );
 
     // Validate image
-    const validation = this.inscriptionService.verifyInscriptionSize(imageBuffer);
+    const validation =
+      this.inscriptionService.verifyInscriptionSize(imageBuffer);
     if (!validation.valid) {
       logger.error(`[DOGECOIN] Validation failed: ${validation.reason}`);
       throw new Error(`Inscription validation failed: ${validation.reason}`);
@@ -68,18 +71,21 @@ export class DogecoinService {
     // Build inscription script
     const inscriptionScript = this.inscriptionService.buildInscriptionScript(
       imageBuffer,
-      contentType,
+      contentType
     );
 
     // Estimate transaction size for fee calculation
-    const txSize = this.inscriptionService.estimateTransactionSize(imageBuffer, contentType);
+    const txSize = this.inscriptionService.estimateTransactionSize(
+      imageBuffer,
+      contentType
+    );
 
     // Estimate fee: 1 sat/byte is typical for Dogecoin
     const estimatedFee = txSize;
 
     logger.info(
       `[DOGECOIN] Inscription script built: ${inscriptionScript.length} bytes, ` +
-        `estimated tx size: ${txSize} bytes, estimated fee: ${estimatedFee} sats`,
+        `estimated tx size: ${txSize} bytes, estimated fee: ${estimatedFee} sats`
     );
 
     try {
@@ -90,12 +96,12 @@ export class DogecoinService {
       const inscriptionId = this.inscriptionService.generateInscriptionId(
         imageBuffer,
         contentType,
-        simulatedTxid,
+        simulatedTxid
       );
 
       logger.info(
         `[DOGECOIN] Inscription configured: txid=${simulatedTxid}, ` +
-          `inscriptionId=${inscriptionId}, chunks=${validation.chunks}`,
+          `inscriptionId=${inscriptionId}, chunks=${validation.chunks}`
       );
 
       // TODO: In production, actually submit the transaction
@@ -103,7 +109,7 @@ export class DogecoinService {
       logger.warn(
         `[DOGECOIN] Full inscription not yet submitted to network. ` +
           `In production, this would create a ${txSize} byte transaction with ` +
-          `${validation.chunks} chunks of image data.`,
+          `${validation.chunks} chunks of image data.`
       );
 
       return {
@@ -114,8 +120,12 @@ export class DogecoinService {
         estimatedFee,
       };
     } catch (error) {
-      logger.error(`[DOGECOIN] Inscription failed: ${(error as any)?.message || error}`);
-      throw new Error(`Failed to inscribe image: ${(error as any)?.message || String(error)}`);
+      logger.error(
+        `[DOGECOIN] Inscription failed: ${(error as any)?.message || error}`
+      );
+      throw new Error(
+        `Failed to inscribe image: ${(error as any)?.message || String(error)}`
+      );
     }
   }
 
@@ -124,11 +134,13 @@ export class DogecoinService {
    * Kept for backward compatibility
    */
   async inscribeDoginal(image: Buffer, text: string): Promise<string> {
-    logger.info(`[DOGECOIN] Text inscription (legacy) for ${text.length} characters`);
+    logger.info(
+      `[DOGECOIN] Text inscription (legacy) for ${text.length} characters`
+    );
     const result = await this.inscribeFullImage(
       image,
       text,
-      this.getManagedRecipientAddress(),
+      this.getManagedRecipientAddress()
     );
     return result.inscriptionId;
   }
@@ -142,11 +154,13 @@ export class DogecoinService {
   }
 
   async sendDoge(toAddress: string, amount: number): Promise<void> {
-    logger.info(`[DOGECOIN] Would send ${amount} DOGE to ${toAddress} via Tatum`);
+    logger.info(
+      `[DOGECOIN] Would send ${amount} DOGE to ${toAddress} via Tatum`
+    );
     // TODO: Call Tatum transaction API
     logger.warn(
       `[DOGECOIN] DOGE reward not yet sent to network. ` +
-        `In production, this would transfer ${amount} DOGE to ${toAddress}.`,
+        `In production, this would transfer ${amount} DOGE to ${toAddress}.`
     );
   }
 
@@ -167,8 +181,16 @@ export class DogecoinService {
     // Dogecoin addresses start with D (mainnet) or n/m (testnet)
     const prefix = env.TATUM_API_KEY?.includes('test') ? 'n' : 'D';
     const crypto = require('crypto');
-    const hash = crypto.createHash('sha256').update(Math.random().toString()).digest();
-    const address = prefix + hash.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 33);
+    const hash = crypto
+      .createHash('sha256')
+      .update(Math.random().toString())
+      .digest();
+    const address =
+      prefix +
+      hash
+        .toString('base64')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 33);
     return address;
   }
 }

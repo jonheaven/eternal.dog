@@ -28,20 +28,16 @@ export class PaymentController {
     this.notificationService = new NotificationService();
   }
 
-  async createCheckoutSession(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  async createCheckoutSession(req: Request, res: Response): Promise<void> {
     try {
-      const { userId, email, utmSource, utmCampaign, utmMedium, utmContent } = req.body;
+      const { userId, email, utmSource, utmCampaign, utmMedium, utmContent } =
+        req.body;
       const rid = (req as any).requestId as string | undefined;
       const log = rid ? withRequest({ requestId: rid }) : undefined;
       const campaign = utmSource || 'direct';
 
       if (!userId || !email) {
-        res
-          .status(400)
-          .json({ error: 'Missing userId or email' });
+        res.status(400).json({ error: 'Missing userId or email' });
         return;
       }
 
@@ -55,7 +51,7 @@ export class PaymentController {
       }
 
       log?.info(
-        `[PAYMENT] Creating checkout session for userId=${userId} campaign=${campaign}`,
+        `[PAYMENT] Creating checkout session for userId=${userId} campaign=${campaign}`
       );
 
       const session = await this.stripe.checkout.sessions.create({
@@ -107,13 +103,13 @@ export class PaymentController {
       await this.notificationService.notifyCheckoutStarted(
         userId,
         email,
-        campaign,
+        campaign
       );
     } catch (error) {
       const rid = (req as any).requestId as string | undefined;
       const log = rid ? withRequest({ requestId: rid }) : undefined;
       log?.error(
-        `[PAYMENT] Error creating checkout: ${(error as any)?.message || error}`,
+        `[PAYMENT] Error creating checkout: ${(error as any)?.message || error}`
       );
       res.status(500).json({ error: 'Failed to create checkout session' });
     }
@@ -126,18 +122,19 @@ export class PaymentController {
       const event = this.stripe.webhooks.constructEvent(
         req.body,
         sig,
-        env.STRIPE_WEBHOOK_SECRET,
+        env.STRIPE_WEBHOOK_SECRET
       );
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object as Stripe.Checkout.Session;
-        const { userId, email, utmSource, utmCampaign, utmMedium } = session.metadata!;
+        const { userId, email, utmSource, utmCampaign, utmMedium } =
+          session.metadata!;
         const campaign = utmSource || 'direct';
 
         const rid = (req as any).requestId as string | undefined;
         const log = rid ? withRequest({ requestId: rid }) : undefined;
         log?.info(
-          `[WEBHOOK] Payment completed userId=${userId} session=${session.id} campaign=${campaign}`,
+          `[WEBHOOK] Payment completed userId=${userId} session=${session.id} campaign=${campaign}`
         );
 
         // Retrieve temp upload
@@ -157,7 +154,9 @@ export class PaymentController {
         } catch (addrErr) {
           const message = (addrErr as any)?.message || String(addrErr);
           log?.error(`[WEBHOOK] Missing managed wallet address: ${message}`);
-          res.status(500).json({ error: 'Managed wallet address not configured' });
+          res
+            .status(500)
+            .json({ error: 'Managed wallet address not configured' });
           return;
         }
 
@@ -165,19 +164,20 @@ export class PaymentController {
           // Inscribe full image on Dogecoin blockchain with retry logic
           log?.info(`[WEBHOOK] Starting inscription for userId=${userId}`);
           const inscriptionResult = await retryService.executeWithRetry(
-            () => this.dogecoinService.inscribeFullImage(
-              image,
-              text,
-              recipientAddress,
-            ),
+            () =>
+              this.dogecoinService.inscribeFullImage(
+                image,
+                text,
+                recipientAddress
+              ),
             'inscribeFullImage',
-            rid,
+            rid
           );
           const inscriptionId = inscriptionResult.inscriptionId;
           const txid = inscriptionResult.txid;
 
           log?.info(
-            `[WEBHOOK] Inscription complete inscriptionId=${inscriptionId} txid=${txid}`,
+            `[WEBHOOK] Inscription complete inscriptionId=${inscriptionId} txid=${txid}`
           );
 
           // Upload image to IPFS for fast retrieval with retry logic
@@ -185,7 +185,7 @@ export class PaymentController {
           const ipfsCid = await retryService.executeWithRetry(
             () => this.ipfsService.uploadImage(image),
             'uploadImage',
-            rid,
+            rid
           );
           log?.info(`[WEBHOOK] IPFS upload complete ipfsCid=${ipfsCid}`);
 
@@ -194,14 +194,16 @@ export class PaymentController {
           const walletAddress = await retryService.executeWithRetry(
             () => this.dogecoinService.createWallet(),
             'createWallet',
-            rid,
+            rid
           );
           await retryService.executeWithRetry(
             () => this.dogecoinService.sendDoge(walletAddress, 4.2),
             'sendDoge',
-            rid,
+            rid
           );
-          log?.info(`[WEBHOOK] Wallet created and DOGE sent to ${walletAddress}`);
+          log?.info(
+            `[WEBHOOK] Wallet created and DOGE sent to ${walletAddress}`
+          );
 
           // Save Doginal metadata with full inscription details
           await Doginal.create({
@@ -216,7 +218,11 @@ export class PaymentController {
 
           // Send email with wallet and image badge
           const badgeUrl = `https://ipfs.io/ipfs/${ipfsCid}`;
-          await this.emailService.sendWalletEmail(email, walletAddress, badgeUrl);
+          await this.emailService.sendWalletEmail(
+            email,
+            walletAddress,
+            badgeUrl
+          );
 
           // Clean up temp upload
           await TempUpload.deleteOne({ userId });
@@ -245,16 +251,16 @@ export class PaymentController {
             email,
             inscriptionId,
             walletAddress,
-            campaign,
+            campaign
           );
 
           log?.info(
             `[WEBHOOK] Inscription workflow complete userId=${userId} ` +
-              `inscriptionId=${inscriptionId} walletAddress=${walletAddress}`,
+              `inscriptionId=${inscriptionId} walletAddress=${walletAddress}`
           );
         } catch (inscriptionError) {
           log?.error(
-            `[WEBHOOK] Inscription error: ${(inscriptionError as any)?.message || inscriptionError}`,
+            `[WEBHOOK] Inscription error: ${(inscriptionError as any)?.message || inscriptionError}`
           );
 
           // Log error event
@@ -276,13 +282,13 @@ export class PaymentController {
             'inscription',
             userId,
             (inscriptionError as any)?.message || String(inscriptionError),
-            campaign,
+            campaign
           );
 
           // Still mark as error in response but don't fail webhook
           // (Stripe expects 200 for successful webhook processing)
           log?.error(
-            `[WEBHOOK] Inscription failed but webhook processed userId=${userId}`,
+            `[WEBHOOK] Inscription failed but webhook processed userId=${userId}`
           );
         }
       }
@@ -291,11 +297,14 @@ export class PaymentController {
     } catch (error) {
       const rid = (req as any).requestId as string | undefined;
       const log = rid ? withRequest({ requestId: rid }) : undefined;
-      log?.error(`[WEBHOOK] Webhook error: ${(error as any)?.message || error}`);
+      log?.error(
+        `[WEBHOOK] Webhook error: ${(error as any)?.message || error}`
+      );
 
       // Try to extract metadata for error tracking
       try {
-        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const body =
+          typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
         const metadata = (body?.data?.object as any)?.metadata;
         if (metadata?.userId) {
           await Event.create({
@@ -313,7 +322,7 @@ export class PaymentController {
             'webhook',
             metadata.userId,
             (error as any)?.message || String(error),
-            metadata.utmSource || 'direct',
+            metadata.utmSource || 'direct'
           );
         }
       } catch (e) {

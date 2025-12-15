@@ -16,11 +16,13 @@ export default function createApp(): Express {
   const app = express();
 
   app.use(helmet({ contentSecurityPolicy: false }));
-  app.use(cors({
-    origin: env.FRONTEND_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-  }));
+  app.use(
+    cors({
+      origin: env.FRONTEND_URL,
+      credentials: true,
+      methods: ['GET', 'POST', 'OPTIONS'],
+    })
+  );
   // Attach a request ID and timestamp to each request
   app.use((req, _res, next) => {
     (req as any).requestId = uuidv4();
@@ -38,9 +40,7 @@ export default function createApp(): Express {
   morgan.token('rtime', (req: any) => req.requestTime || '-');
   app.use(morgan(':rtime :rid :method :url :status :response-time ms'));
   app.use(express.json({ limit: '1mb' }));
-  app.use(
-    express.raw({ type: 'application/json', limit: '1mb' }),
-  );
+  app.use(express.raw({ type: 'application/json', limit: '1mb' }));
   app.use(loggerMiddleware);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));

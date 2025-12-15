@@ -33,11 +33,11 @@ export default function UploadForm() {
       }
 
       const canvas = cropper.getCroppedCanvas();
-      
+
       if (!canvas) {
         throw new Error('Failed to generate canvas from cropped image');
       }
-      
+
       // Convert to webp blob
       canvas.toBlob(
         async (blob: Blob | null) => {
@@ -46,24 +46,26 @@ export default function UploadForm() {
             setLoading(false);
             return;
           }
-          
+
           try {
             const reader = new FileReader();
             reader.onloadend = async () => {
               try {
                 const base64 = reader.result as string;
                 const userId = uuidv4();
-                
+
                 await axios.post(
                   `${import.meta.env.VITE_API_URL}/upload/preview`,
                   {
                     image: base64.split(',')[1],
                     text,
                     userId,
-                  },
+                  }
                 );
-                
-                navigate('/preview', { state: { image: base64, text, userId } });
+
+                navigate('/preview', {
+                  state: { image: base64, text, userId },
+                });
               } catch (error) {
                 console.error('Upload failed:', error);
                 alert('Failed to save preview. Try again.');

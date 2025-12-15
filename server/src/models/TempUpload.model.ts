@@ -18,7 +18,4 @@ const TempUploadSchema = new Schema<ITempUpload>({
   },
 });
 
-export default mongoose.model<ITempUpload>(
-  'TempUpload',
-  TempUploadSchema,
-);
+export default mongoose.model<ITempUpload>('TempUpload', TempUploadSchema);

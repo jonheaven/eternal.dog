@@ -9,11 +9,21 @@ export class UploadController {
 
   async uploadPreview(req: Request, res: Response): Promise<void> {
     try {
-      const { image, text, userId, utmSource, utmCampaign, utmMedium, utmContent } = req.body;
+      const {
+        image,
+        text,
+        userId,
+        utmSource,
+        utmCampaign,
+        utmMedium,
+        utmContent,
+      } = req.body;
       const rid = (req as any).requestId as string | undefined;
       const log = rid ? withRequest({ requestId: rid }) : undefined;
       const campaign = utmSource || 'direct';
-      log?.info(`[UPLOAD] Received preview for userId=${userId} campaign=${campaign}`);
+      log?.info(
+        `[UPLOAD] Received preview for userId=${userId} campaign=${campaign}`
+      );
 
       // Validation
       if (!image || !text || !userId) {
@@ -34,9 +44,7 @@ export class UploadController {
       }
 
       // Set expiry to 24 hours
-      const expiresAt = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      );
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       // Save to MongoDB
       await TempUpload.create({
@@ -46,7 +54,9 @@ export class UploadController {
         expiresAt,
       });
 
-      log?.info(`[UPLOAD] Preview saved for userId=${userId} expiresAt=${expiresAt.toISOString()}`);
+      log?.info(
+        `[UPLOAD] Preview saved for userId=${userId} expiresAt=${expiresAt.toISOString()}`
+      );
       res.json({ success: true, userId });
 
       // Log event and notify with campaign tracking
@@ -59,7 +69,10 @@ export class UploadController {
         utmContent: utmContent,
         metadata: { text },
       });
-      await this.notificationService.notifyUploadPreview(userId, utmSource || 'direct');
+      await this.notificationService.notifyUploadPreview(
+        userId,
+        utmSource || 'direct'
+      );
     } catch (error) {
       const rid = (req as any).requestId as string | undefined;
       const log = rid ? withRequest({ requestId: rid }) : undefined;
@@ -77,16 +90,22 @@ export class UploadController {
           'upload',
           userId,
           (error as any)?.message || String(error),
-          utmSource,
+          utmSource
         );
       }
       if (userId) {
-        await Event.create({ type: 'error', userId, metadata: { context: 'upload', error: String(error) } });
-        await this.notificationService.notifyError('upload', userId, (error as any)?.message || String(error));
+        await Event.create({
+          type: 'error',
+          userId,
+          metadata: { context: 'upload', error: String(error) },
+        });
+        await this.notificationService.notifyError(
+          'upload',
+          userId,
+          (error as any)?.message || String(error)
+        );
       }
-      res
-        .status(500)
-        .json({ error: 'Failed to save preview' });
+      res.status(500).json({ error: 'Failed to save preview' });
     }
   }
 }

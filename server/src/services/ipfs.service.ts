@@ -13,14 +13,17 @@ export class IPFSService {
     try {
       logger.info(`[IPFS] Uploading ${image.length} bytes to Pinata`);
 
-      const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${env.PINATA_SECRET_KEY}`,
-          ...form.getHeaders(),
-        },
-        body: form as any,
-      });
+      const res = await fetch(
+        'https://api.pinata.cloud/pinning/pinFileToIPFS',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${env.PINATA_SECRET_KEY}`,
+            ...form.getHeaders(),
+          },
+          body: form as any,
+        }
+      );
 
       if (!res.ok) {
         const text = await res.text();
@@ -34,9 +37,8 @@ export class IPFSService {
     } catch (error) {
       logger.error(`[IPFS] Upload error: ${(error as any)?.message || error}`);
       throw new Error(
-        `Failed to upload image to IPFS: ${(error as any)?.message || String(error)}`,
+        `Failed to upload image to IPFS: ${(error as any)?.message || String(error)}`
       );
     }
   }
 }
-

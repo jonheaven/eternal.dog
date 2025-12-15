@@ -20,9 +20,12 @@ export class InscriptionService {
    * The content is preserved permanently on the blockchain
    */
   buildInscriptionScript(imageBuffer: Buffer, contentType: string): Buffer {
-    const chunks = this.chunkContent(imageBuffer, InscriptionService.CHUNK_SIZE);
+    const chunks = this.chunkContent(
+      imageBuffer,
+      InscriptionService.CHUNK_SIZE
+    );
     logger.debug(
-      `[INSCRIPTION] Building script with ${chunks.length} chunks, content-type: ${contentType}`,
+      `[INSCRIPTION] Building script with ${chunks.length} chunks, content-type: ${contentType}`
     );
 
     const opcodes = {
@@ -35,20 +38,32 @@ export class InscriptionService {
     let scriptBuffer = Buffer.alloc(0);
 
     // OP_FALSE OP_IF
-    scriptBuffer = Buffer.concat([scriptBuffer, Buffer.from([opcodes.OP_FALSE, opcodes.OP_IF])]);
+    scriptBuffer = Buffer.concat([
+      scriptBuffer,
+      Buffer.from([opcodes.OP_FALSE, opcodes.OP_IF]),
+    ]);
 
     // Push "ord" protocol ID
-    scriptBuffer = Buffer.concat([scriptBuffer, this.pushData(InscriptionService.PROTOCOL_ID)]);
+    scriptBuffer = Buffer.concat([
+      scriptBuffer,
+      this.pushData(InscriptionService.PROTOCOL_ID),
+    ]);
 
     // Push content-type: 0x01 + content type string
     const contentTypeBuffer = Buffer.concat([
       Buffer.from([0x01]),
       Buffer.from(contentType, 'utf-8'),
     ]);
-    scriptBuffer = Buffer.concat([scriptBuffer, this.pushData(contentTypeBuffer)]);
+    scriptBuffer = Buffer.concat([
+      scriptBuffer,
+      this.pushData(contentTypeBuffer),
+    ]);
 
     // Push empty slice (separator)
-    scriptBuffer = Buffer.concat([scriptBuffer, this.pushData(Buffer.alloc(0))]);
+    scriptBuffer = Buffer.concat([
+      scriptBuffer,
+      this.pushData(Buffer.alloc(0)),
+    ]);
 
     // Push all content chunks
     for (const chunk of chunks) {
@@ -56,10 +71,13 @@ export class InscriptionService {
     }
 
     // OP_ENDIF
-    scriptBuffer = Buffer.concat([scriptBuffer, Buffer.from([opcodes.OP_ENDIF])]);
+    scriptBuffer = Buffer.concat([
+      scriptBuffer,
+      Buffer.from([opcodes.OP_ENDIF]),
+    ]);
 
     logger.info(
-      `[INSCRIPTION] Script built: ${scriptBuffer.length} bytes total, ${chunks.length} chunks`,
+      `[INSCRIPTION] Script built: ${scriptBuffer.length} bytes total, ${chunks.length} chunks`
     );
     return scriptBuffer;
   }
@@ -68,13 +86,18 @@ export class InscriptionService {
    * Split content into safe chunks for blockchain storage
    * 520 bytes is the maximum safe size for script push operations
    */
-  chunkContent(buffer: Buffer, chunkSize: number = InscriptionService.CHUNK_SIZE): Buffer[] {
+  chunkContent(
+    buffer: Buffer,
+    chunkSize: number = InscriptionService.CHUNK_SIZE
+  ): Buffer[] {
     const chunks: Buffer[] = [];
     for (let i = 0; i < buffer.length; i += chunkSize) {
       const endIndex = Math.min(i + chunkSize, buffer.length);
       chunks.push(buffer.slice(i, endIndex));
     }
-    logger.debug(`[INSCRIPTION] Split ${buffer.length} bytes into ${chunks.length} chunks`);
+    logger.debug(
+      `[INSCRIPTION] Split ${buffer.length} bytes into ${chunks.length} chunks`
+    );
     return chunks;
   }
 
@@ -96,11 +119,13 @@ export class InscriptionService {
 
     if (imageBuffer.length > RECOMMENDED_MAX) {
       logger.warn(
-        `[INSCRIPTION] Image size ${imageBuffer.length} bytes exceeds recommended ${RECOMMENDED_MAX} bytes`,
+        `[INSCRIPTION] Image size ${imageBuffer.length} bytes exceeds recommended ${RECOMMENDED_MAX} bytes`
       );
     }
 
-    const chunks = Math.ceil(imageBuffer.length / InscriptionService.CHUNK_SIZE);
+    const chunks = Math.ceil(
+      imageBuffer.length / InscriptionService.CHUNK_SIZE
+    );
     return {
       valid: true,
       size: imageBuffer.length,
@@ -154,7 +179,7 @@ export class InscriptionService {
     }
 
     throw new Error(
-      `Data too large for script push: ${length} bytes (max 65535 bytes per chunk)`,
+      `Data too large for script push: ${length} bytes (max 65535 bytes per chunk)`
     );
   }
 
@@ -163,7 +188,10 @@ export class InscriptionService {
    * Used for fee calculation
    */
   estimateTransactionSize(imageBuffer: Buffer, contentType: string): number {
-    const scriptSize = this.buildInscriptionScript(imageBuffer, contentType).length;
+    const scriptSize = this.buildInscriptionScript(
+      imageBuffer,
+      contentType
+    ).length;
 
     // Transaction overhead
     const VERSION = 4; // bytes
@@ -185,7 +213,8 @@ export class InscriptionService {
     // Witness: witness count + items + witness script
     const WITNESS_STACK_ITEM_COUNT = 1;
     const WITNESS_SCRIPT_VARINT = 3;
-    const WITNESS_SIZE = WITNESS_STACK_ITEM_COUNT + WITNESS_SCRIPT_VARINT + scriptSize;
+    const WITNESS_SIZE =
+      WITNESS_STACK_ITEM_COUNT + WITNESS_SCRIPT_VARINT + scriptSize;
 
     const totalSize =
       VERSION +
@@ -196,7 +225,9 @@ export class InscriptionService {
       LOCKTIME +
       WITNESS_SIZE;
 
-    logger.debug(`[INSCRIPTION] Estimated transaction size: ${totalSize} bytes`);
+    logger.debug(
+      `[INSCRIPTION] Estimated transaction size: ${totalSize} bytes`
+    );
     return totalSize;
   }
 
@@ -205,7 +236,11 @@ export class InscriptionService {
    * In real ordinals, this is: TXID + i + OUTPUT_INDEX
    * For now, returns a deterministic ID based on content hash
    */
-  generateInscriptionId(imageBuffer: Buffer, contentType: string, txid?: string): string {
+  generateInscriptionId(
+    imageBuffer: Buffer,
+    contentType: string,
+    txid?: string
+  ): string {
     if (txid) {
       // Format: TXID:0:0 (transaction:input:satpoint)
       return `${txid}:0:0`;

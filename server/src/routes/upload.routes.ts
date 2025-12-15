@@ -25,7 +25,7 @@ const previewLimiter = rateLimit({
 router.post(
   '/preview',
   previewLimiter,
-  controller.uploadPreview.bind(controller),
+  controller.uploadPreview.bind(controller)
 );
 
 export default router;
