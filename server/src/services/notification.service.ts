@@ -1,4 +1,4 @@
-import { logger, withRequest } from '../utils/logger';
+import { logger, withRequest } from '../utils/logger.js';
 
 export class NotificationService {
   async notifySlack(message: string, metadata?: Record<string, any>): Promise<void> {

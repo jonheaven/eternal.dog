@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import Event from '../models/Event.model';
-import { withRequest } from '../utils/logger';
+import Event from '../models/Event.model.js';
+import { withRequest } from '../utils/logger.js';
 
 const router = Router();
 

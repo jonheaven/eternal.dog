@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
+import wizardDog from '../assets/wizard-dog.svg';
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-dogecoin">
-      <img src="/assets/wizard-dog.svg" alt="Wizard Dog" className="w-32 mb-4" />
+      <img src={wizardDog} alt="Wizard Dog" className="w-32 mb-4" />
       <h1 className="text-3xl md:text-4xl font-bold text-center">
         Immortalize Your Dog for $14.20!
       </h1>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import Cropper from 'react-cropper';
+import { useState, useRef } from 'react';
+import Cropper, { ReactCropperElement } from 'react-cropper';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,28 +7,53 @@ import { v4 as uuidv4 } from 'uuid';
 export default function UploadForm() {
   const [image, setImage] = useState<string | null>(null);
   const [text, setText] = useState('');
-  const [cropper, setCropper] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const cropperRef = useRef<ReactCropperElement>(null);
   const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setImage(URL.createObjectURL(file));
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
   };
 
   const handleCrop = async () => {
-    if (cropper) {
-      cropper
-        .getCroppedCanvas({ width: 512, height: 512 })
-        .toBlob(async (blob: Blob) => {
-          if (blob) {
+    const imageElement = cropperRef.current;
+    if (!imageElement) {
+      alert('Please wait for the image to load completely.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const cropper = imageElement.cropper;
+      if (!cropper) {
+        throw new Error('Cropper instance not initialized');
+      }
+
+      const canvas = cropper.getCroppedCanvas();
+      
+      if (!canvas) {
+        throw new Error('Failed to generate canvas from cropped image');
+      }
+      
+      // Convert to webp blob
+      canvas.toBlob(
+        async (blob: Blob | null) => {
+          if (!blob) {
+            alert('Failed to process image. Try again.');
+            setLoading(false);
+            return;
+          }
+          
+          try {
             const reader = new FileReader();
-            reader.readAsDataURL(blob);
             reader.onloadend = async () => {
-              const base64 = reader.result as string;
               try {
-                setLoading(true);
+                const base64 = reader.result as string;
                 const userId = uuidv4();
+                
                 await axios.post(
                   `${import.meta.env.VITE_API_URL}/upload/preview`,
                   {
@@ -37,16 +62,28 @@ export default function UploadForm() {
                     userId,
                   },
                 );
+                
                 navigate('/preview', { state: { image: base64, text, userId } });
               } catch (error) {
                 console.error('Upload failed:', error);
                 alert('Failed to save preview. Try again.');
-              } finally {
                 setLoading(false);
               }
             };
+            reader.readAsDataURL(blob);
+          } catch (error) {
+            console.error('File reader error:', error);
+            alert('Failed to process image. Try again.');
+            setLoading(false);
           }
-        }, 'image/jpeg', 0.8);
+        },
+        'image/webp',
+        0.8
+      );
+    } catch (error) {
+      console.error('Crop failed:', error);
+      alert('Failed to crop image. Try again.');
+      setLoading(false);
     }
   };
 
@@ -63,11 +100,17 @@ export default function UploadForm() {
       />
       {image && (
         <Cropper
+          ref={cropperRef}
           src={image}
           style={{ height: 300, width: '100%' }}
           aspectRatio={1}
-          guides={false}
-          onInitialized={(instance) => setCropper(instance)}
+          guides={true}
+          viewMode={1}
+          dragMode="move"
+          autoCropArea={1}
+          background={false}
+          responsive={true}
+          checkOrientation={false}
           className="mb-4"
         />
       )}

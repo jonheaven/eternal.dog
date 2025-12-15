@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "ts-node --esm src/server.ts",
+    "start": "tsx src/server.ts",
     "build": "tsc",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
@@ -37,6 +37,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

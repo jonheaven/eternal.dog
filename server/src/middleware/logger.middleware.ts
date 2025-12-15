@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { withRequest, logger } from '../utils/logger';
+import { withRequest, logger } from '../utils/logger.js';
 
 /**
  * Logger middleware: Injects req.logger into every request

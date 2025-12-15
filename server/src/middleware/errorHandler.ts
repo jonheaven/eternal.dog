@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger, withRequest } from '../utils/logger';
+import { logger, withRequest } from '../utils/logger.js';
 
 export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
   const rid = (req as any).requestId as string | undefined;

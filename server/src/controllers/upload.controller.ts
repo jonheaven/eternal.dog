@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import TempUpload from '../models/TempUpload.model';
-import Event from '../models/Event.model';
-import { withRequest } from '../utils/logger';
-import { NotificationService } from '../services/notification.service';
+import TempUpload from '../models/TempUpload.model.js';
+import Event from '../models/Event.model.js';
+import { withRequest } from '../utils/logger.js';
+import { NotificationService } from '../services/notification.service.js';
 
 export class UploadController {
   private notificationService = new NotificationService();

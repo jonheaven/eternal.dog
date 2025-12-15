@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
-import TempUpload from '../models/TempUpload.model';
-import Doginal from '../models/Doginal.model';
-import { DogecoinService } from '../services/dogecoin.service';
-import { IPFSService } from '../services/ipfs.service';
-import { EmailService } from '../services/email.service';
-import { NotificationService } from '../services/notification.service';
-import { withRequest } from '../utils/logger';
-import Event from '../models/Event.model';
-import { retryService } from '../services/RetryService';
+import TempUpload from '../models/TempUpload.model.js';
+import Doginal from '../models/Doginal.model.js';
+import { DogecoinService } from '../services/dogecoin.service.js';
+import { IPFSService } from '../services/ipfs.service.js';
+import { EmailService } from '../services/email.service.js';
+import { NotificationService } from '../services/notification.service.js';
+import { withRequest } from '../utils/logger.js';
+import Event from '../models/Event.model.js';
+import { retryService } from '../services/RetryService.js';
+import { env } from '../config/env.js';
 
 export class PaymentController {
   private stripe: Stripe;
@@ -18,8 +19,8 @@ export class PaymentController {
   private notificationService: NotificationService;
 
   constructor() {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      // Use latest API version
+    this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
     });
     this.dogecoinService = new DogecoinService();
     this.ipfsService = new IPFSService();
@@ -74,8 +75,9 @@ export class PaymentController {
           },
         ],
         mode: 'payment',
-        success_url: `${process.env.FRONTEND_URL}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/preview`,
+        locale: 'en',
+        success_url: `${env.FRONTEND_URL}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${env.FRONTEND_URL}/preview`,
         metadata: {
           userId,
           email,
@@ -83,10 +85,13 @@ export class PaymentController {
           utmCampaign: utmCampaign || 'organic',
           utmMedium: utmMedium || 'organic',
         },
-      } as any);
+      });
 
       log?.info(`[PAYMENT] Stripe session created sessionId=${session.id}`);
-      res.json({ sessionId: session.id });
+      res.json({
+        sessionId: session.id,
+        sessionUrl: session.url,
+      });
 
       // Log event and notify with campaign tracking
       await Event.create({
@@ -121,7 +126,7 @@ export class PaymentController {
       const event = this.stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET!,
+        env.STRIPE_WEBHOOK_SECRET,
       );
 
       if (event.type === 'checkout.session.completed') {

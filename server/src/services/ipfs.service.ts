@@ -1,5 +1,6 @@
 import FormData from 'form-data';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
+import { env } from '../config/env.js';
 
 export class IPFSService {
   async uploadImage(image: Buffer): Promise<string> {
@@ -15,7 +16,7 @@ export class IPFSService {
       const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.PINATA_SECRET_KEY!}`,
+          Authorization: `Bearer ${env.PINATA_SECRET_KEY}`,
           ...form.getHeaders(),
         },
         body: form as any,

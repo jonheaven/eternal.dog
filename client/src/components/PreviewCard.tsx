@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
 import { DoginalData } from '../types/doginal';
-
-const stripePromise = loadStripe(
-  import.meta.env.VITE_STRIPE_PUBLIC_KEY,
-);
+import { createCheckoutSession } from '../services/api';
 
 export default function PreviewCard() {
   const { state } = useLocation();
@@ -35,25 +31,21 @@ export default function PreviewCard() {
       alert('Please enter your email.');
       return;
     }
+
     try {
       setLoading(true);
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/payment/create-checkout-session`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, email }),
-        },
-      );
-      if (!response.ok) throw new Error('Payment initiation failed');
-      const { sessionId } = await response.json();
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe failed to load');
-      await (stripe as any).redirectToCheckout({ sessionId });
+
+      // Create checkout session via API (includes UTM params)
+      const { sessionId, sessionUrl } = await createCheckoutSession(userId, email);
+
+      if (!sessionId) throw new Error('No session ID returned');
+
+      // Prefer server-provided hosted URL; fall back to constructing path if missing
+      const redirectUrl = sessionUrl || `https://checkout.stripe.com/c/pay/${sessionId}`;
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error('Payment failed:', error);
       alert('Payment initiation failed. Try again.');
-    } finally {
       setLoading(false);
     }
   };

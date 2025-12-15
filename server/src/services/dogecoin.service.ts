@@ -1,5 +1,6 @@
-import { logger } from '../utils/logger';
-import { InscriptionService } from './inscription.service';
+import { logger } from '../utils/logger.js';
+import { InscriptionService } from './inscription.service.js';
+import { env } from '../config/env.js';
 
 export interface InscriptionTxResult {
   inscriptionId: string;
@@ -164,7 +165,7 @@ export class DogecoinService {
    */
   private generateMockDogecoinAddress(): string {
     // Dogecoin addresses start with D (mainnet) or n/m (testnet)
-    const prefix = process.env.TATUM_API_KEY?.includes('test') ? 'n' : 'D';
+    const prefix = env.TATUM_API_KEY?.includes('test') ? 'n' : 'D';
     const crypto = require('crypto');
     const hash = crypto.createHash('sha256').update(Math.random().toString()).digest();
     const address = prefix + hash.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 33);

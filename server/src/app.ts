@@ -3,21 +3,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { v4 as uuidv4 } from 'uuid';
-import { errorHandler } from './middleware/errorHandler';
-import { withRequest, logger } from './utils/logger';
-import { loggerMiddleware } from './middleware/logger.middleware';
-import uploadRoutes from './routes/upload.routes';
-import paymentRoutes from './routes/payment.routes';
-import statsRoutes from './routes/stats.routes';
-import doginalRoutes from './routes/doginals.routes';
-import rateLimitMiddleware from './middleware/rateLimit.middleware';
+import { errorHandler } from './middleware/errorHandler.js';
+import { withRequest, logger } from './utils/logger.js';
+import { loggerMiddleware } from './middleware/logger.middleware.js';
+import uploadRoutes from './routes/upload.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
+import statsRoutes from './routes/stats.routes.js';
+import doginalRoutes from './routes/doginals.routes.js';
+import { env } from './config/env.js';
 
 export default function createApp(): Express {
   const app = express();
 
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
   }));
@@ -41,7 +41,6 @@ export default function createApp(): Express {
   app.use(
     express.raw({ type: 'application/json', limit: '1mb' }),
   );
-  app.use(rateLimitMiddleware);
   app.use(loggerMiddleware);
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));

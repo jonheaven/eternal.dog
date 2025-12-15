@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import Doginal from '../models/Doginal.model';
-import { withRequest } from '../utils/logger';
+import Doginal from '../models/Doginal.model.js';
+import { withRequest } from '../utils/logger.js';
 
 const router = Router();
 

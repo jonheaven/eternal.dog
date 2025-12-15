@@ -1,6 +1,6 @@
-import createApp from './app';
+import createApp from './app.js';
 import mongoose from 'mongoose';
-import { env } from './config/env';
+import { env } from './config/env.js';
 
 const app = createApp();
 const PORT = env.PORT;

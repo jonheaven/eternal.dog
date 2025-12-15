@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { env } from '../config/env.js';
 
 export class EmailService {
   private transporter: nodemailer.Transporter;
@@ -7,8 +8,8 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASS,
       },
     });
   }
@@ -22,7 +23,7 @@ export class EmailService {
       console.log(`[EMAIL] Sending wallet email to ${to}`);
 
       await this.transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: env.EMAIL_USER,
         to,
         subject: '🐶 Your Eternal Dog Wallet - $4.20 DOGE Inside!',
         html: `
