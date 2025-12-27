@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
+import { v4 as uuidv4 } from 'uuid';
 import TempUpload from '../models/TempUpload.model.js';
 import Doginal from '../models/Doginal.model.js';
 import { DogecoinService } from '../services/dogecoin.service.js';
@@ -147,28 +148,27 @@ export class PaymentController {
 
         const { image, text } = tempUpload;
 
-        // Resolve managed Dogecoin address (fail fast if missing)
-        let recipientAddress: string;
         try {
-          recipientAddress = this.dogecoinService.getManagedRecipientAddress();
-        } catch (addrErr) {
-          const message = (addrErr as any)?.message || String(addrErr);
-          log?.error(`[WEBHOOK] Missing managed wallet address: ${message}`);
-          res
-            .status(500)
-            .json({ error: 'Managed wallet address not configured' });
-          return;
-        }
+          // Generate recipient wallet first (before inscribing)
+          // This returns address, mnemonic, and privateKey - we must deliver mnemonic/privateKey to user securely
+          log?.info(`[WEBHOOK] Generating recipient wallet`);
+          const wallet = await retryService.executeWithRetry(
+            () => this.dogecoinService.createWallet(),
+            'createWallet',
+            rid
+          );
+          log?.info(`[WEBHOOK] Generated wallet address: ${wallet.address}`);
+          // NOTE: Never log wallet.mnemonic or wallet.privateKey - these are sensitive!
 
-        try {
           // Inscribe full image on Dogecoin blockchain with retry logic
-          log?.info(`[WEBHOOK] Starting inscription for userId=${userId}`);
+          // The inscription includes sending $4.20 USD worth of DOGE to the recipient in the final reveal tx
+          log?.info(`[WEBHOOK] Starting inscription for userId=${userId}, recipient=${wallet.address}`);
           const inscriptionResult = await retryService.executeWithRetry(
             () =>
               this.dogecoinService.inscribeFullImage(
                 image,
                 text,
-                recipientAddress
+                wallet.address // Recipient gets the inscribed UTXO + $4.20 USD worth of DOGE
               ),
             'inscribeFullImage',
             rid
@@ -180,8 +180,18 @@ export class PaymentController {
             `[WEBHOOK] Inscription complete inscriptionId=${inscriptionId} txid=${txid}`
           );
 
-          // Upload image to IPFS for fast retrieval with retry logic
-          log?.info(`[WEBHOOK] Uploading to IPFS`);
+          // Generate DOGE ID badge image
+          log?.info(`[WEBHOOK] Generating DOGE ID badge`);
+          const { generateDogeIdBadge } = await import('../services/badge.service.js');
+          const badgeBuffer = await generateDogeIdBadge(image, {
+            dogName: text,
+            issuedDate: new Date().toISOString(),
+            expiryDate: '♾️', // ETERNAL!
+          });
+          log?.info(`[WEBHOOK] Badge generated: ${badgeBuffer.length} bytes`);
+
+          // Upload original image to IPFS for fast retrieval with retry logic
+          log?.info(`[WEBHOOK] Uploading original image to IPFS`);
           const ipfsCid = await retryService.executeWithRetry(
             () => this.ipfsService.uploadImage(image),
             'uploadImage',
@@ -189,40 +199,52 @@ export class PaymentController {
           );
           log?.info(`[WEBHOOK] IPFS upload complete ipfsCid=${ipfsCid}`);
 
-          // Create wallet and send DOGE reward with retry logic
-          log?.info(`[WEBHOOK] Creating wallet and sending DOGE reward`);
-          const walletAddress = await retryService.executeWithRetry(
-            () => this.dogecoinService.createWallet(),
-            'createWallet',
+          // Upload badge to IPFS
+          log?.info(`[WEBHOOK] Uploading badge to IPFS`);
+          const badgeIpfsCid = await retryService.executeWithRetry(
+            () => this.ipfsService.uploadImage(badgeBuffer),
+            'uploadBadge',
             rid
           );
-          await retryService.executeWithRetry(
-            () => this.dogecoinService.sendDoge(walletAddress, 4.2),
-            'sendDoge',
-            rid
-          );
-          log?.info(
-            `[WEBHOOK] Wallet created and DOGE sent to ${walletAddress}`
-          );
+          log?.info(`[WEBHOOK] Badge IPFS upload complete badgeIpfsCid=${badgeIpfsCid}`);
+
+          // Generate claim UUID and set expiry date (30 days)
+          const claimUuid = uuidv4();
+          const claimExpiryDate = new Date();
+          claimExpiryDate.setDate(claimExpiryDate.getDate() + 30); // 30 days from now
 
           // Save Doginal metadata with full inscription details
+          // IMPORTANT: We only store the wallet address, NOT the mnemonic or privateKey
+          // The mnemonic/privateKey are only sent via email to the user
           await Doginal.create({
             inscriptionId,
             ipfsCid,
-            walletAddress,
+            badgeIpfsCid, // DOGE ID badge IPFS CID
+            walletAddress: wallet.address, // Only store address, never mnemonic/privateKey
             userEmail: email,
+            dogName: text.substring(0, 50) || 'Eternal Dog', // Extract dog name from text
+            description: text,
+            isPublic: true, // Default to public
             imageSize: image.length,
             chunks: inscriptionResult.chunks,
             txid,
+            claimUuid,
+            claimExpiryDate,
+            claimed: false, // Wallet will be claimed when user accesses claim link
           });
 
-          // Send email with wallet and image badge
-          const badgeUrl = `https://ipfs.io/ipfs/${ipfsCid}`;
+          // Send email with wallet credentials and DOGE ID badge
+          // This email contains the sensitive mnemonic and privateKey - user must save this securely
+          const badgeUrl = `https://ipfs.io/ipfs/${badgeIpfsCid}`;
           await this.emailService.sendWalletEmail(
             email,
-            walletAddress,
-            badgeUrl
+            wallet.address,
+            badgeUrl,
+            wallet.mnemonic, // Seed phrase - user needs this to import wallet
+            wallet.privateKey, // Private key - user needs this to import wallet
+            claimUuid // Include claim UUID for claim page access
           );
+          log?.info(`[WEBHOOK] Wallet credentials sent to ${email} (mnemonic/privateKey not stored in database)`);
 
           // Clean up temp upload
           await TempUpload.deleteOne({ userId });
@@ -239,7 +261,8 @@ export class PaymentController {
               inscriptionId,
               txid,
               ipfsCid,
-              walletAddress,
+              badgeIpfsCid,
+              walletAddress: wallet.address,
               imageSize: image.length,
               chunks: inscriptionResult.chunks,
             },
@@ -250,13 +273,13 @@ export class PaymentController {
             userId,
             email,
             inscriptionId,
-            walletAddress,
+            wallet.address,
             campaign
           );
 
           log?.info(
             `[WEBHOOK] Inscription workflow complete userId=${userId} ` +
-              `inscriptionId=${inscriptionId} walletAddress=${walletAddress}`
+              `inscriptionId=${inscriptionId} walletAddress=${wallet.address}`
           );
         } catch (inscriptionError) {
           log?.error(

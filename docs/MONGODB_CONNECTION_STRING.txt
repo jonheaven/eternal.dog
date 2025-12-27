@@ -1,0 +1,19 @@
+Based on MongoDB Atlas, use one of these in your server/.env file:
+
+OPTION 1 (Recommended - includes database name):
+MONGO_URI=mongodb+srv://jheaven_db_user:SNef7yMmWuG7BneS@eternal-dog-cluster.wodhvzc.mongodb.net/eternal-dog?appName=eternal-dog-cluster
+
+OPTION 2 (Exactly as Atlas shows - also works):
+MONGO_URI=mongodb+srv://jheaven_db_user:SNef7yMmWuG7BneS@eternal-dog-cluster.wodhvzc.mongodb.net/?appName=eternal-dog-cluster
+
+KEY CHANGES:
+✓ Replaced <db_password> with: SNef7yMmWuG7BneS
+✓ Option 1 includes database name '/eternal-dog' (recommended)
+✓ Option 2 matches Atlas exactly (works too)
+✓ The ?appName= parameter is fine (helps with monitoring in Atlas)
+
+IMPORTANT:
+1. Make sure Network Access is configured in MongoDB Atlas (add 0.0.0.0/0)
+2. Verify the database user password matches: SNef7yMmWuG7BneS
+3. After updating .env, restart your server
+

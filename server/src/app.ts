@@ -10,6 +10,8 @@ import uploadRoutes from './routes/upload.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import doginalRoutes from './routes/doginals.routes.js';
+import dogePriceRoutes from './routes/dogePrice.routes.js';
+import claimRoutes from './routes/claim.routes.js';
 import { env } from './config/env.js';
 
 export default function createApp(): Express {
@@ -49,6 +51,8 @@ export default function createApp(): Express {
   app.use('/upload', uploadRoutes);
   app.use('/payment', paymentRoutes);
   app.use('/stats', statsRoutes);
+  app.use('/doge-price', dogePriceRoutes);
+  app.use('/claim', claimRoutes);
   app.use('/', doginalRoutes);
 
   // Centralized error handler last
